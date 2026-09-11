@@ -1,0 +1,199 @@
+{
+  "schema": 1,
+  "freeze": "m4f-r0-reviewed-v1",
+  "cases": [
+    {
+      "id": "complete",
+      "currentReuseStatus": "usable",
+      "packageStatus": "complete",
+      "http": 200,
+      "cliExit": 0,
+      "staleReasons": [],
+      "markdownPresent": true,
+      "filesUnchangedByVerify": true,
+      "reasonCode": "verified"
+    },
+    {
+      "id": "zero-match",
+      "currentReuseStatus": "usable",
+      "packageStatus": "complete",
+      "http": 200,
+      "cliExit": 0,
+      "staleReasons": [],
+      "markdownPresent": true,
+      "filesUnchangedByVerify": true,
+      "logicalReferencesChecked": 0,
+      "duplicateReferenceCount": 0,
+      "reasonCode": "verified"
+    },
+    {
+      "id": "partial",
+      "currentReuseStatus": "usable",
+      "packageStatus": "partial",
+      "http": 200,
+      "cliExit": 0,
+      "staleReasons": [],
+      "markdownPresent": true,
+      "filesUnchangedByVerify": true,
+      "requiresPartialWarning": true,
+      "reasonCode": "verified"
+    },
+    {
+      "id": "add-source",
+      "currentReuseStatus": "stale",
+      "packageStatus": "complete",
+      "http": 200,
+      "cliExit": 2,
+      "staleReasons": [
+        "source-scope-changed"
+      ],
+      "markdownPresent": false,
+      "filesUnchangedByVerify": true,
+      "reasonCode": "stale"
+    },
+    {
+      "id": "change-version",
+      "currentReuseStatus": "stale",
+      "packageStatus": "complete",
+      "http": 200,
+      "cliExit": 2,
+      "staleReasons": [
+        "source-scope-changed"
+      ],
+      "markdownPresent": false,
+      "filesUnchangedByVerify": true,
+      "reasonCode": "stale"
+    },
+    {
+      "id": "other-project",
+      "currentReuseStatus": "usable",
+      "packageStatus": "complete",
+      "http": 200,
+      "cliExit": 0,
+      "staleReasons": [],
+      "markdownPresent": true,
+      "filesUnchangedByVerify": true,
+      "reasonCode": "verified"
+    },
+    {
+      "id": "ordinary-note",
+      "currentReuseStatus": "usable",
+      "packageStatus": "complete",
+      "http": 200,
+      "cliExit": 0,
+      "staleReasons": [],
+      "markdownPresent": true,
+      "filesUnchangedByVerify": true,
+      "reasonCode": "verified"
+    },
+    {
+      "id": "latest-not-csv",
+      "currentReuseStatus": "stale",
+      "packageStatus": "complete",
+      "http": 200,
+      "cliExit": 2,
+      "staleReasons": [
+        "source-scope-changed"
+      ],
+      "markdownPresent": false,
+      "filesUnchangedByVerify": true,
+      "reasonCode": "stale"
+    },
+    {
+      "id": "wrong-project",
+      "currentReuseStatus": "failed",
+      "packageStatus": null,
+      "http": 404,
+      "cliExit": 1,
+      "staleReasons": [],
+      "markdownPresent": false,
+      "filesUnchangedByVerify": true,
+      "errorCode": "EVIDENCE_NOT_FOUND",
+      "errorEnvelope": "error.code is asserted; full verification report/reasonCode not required on failure"
+    },
+    {
+      "id": "missing-package",
+      "currentReuseStatus": "failed",
+      "packageStatus": null,
+      "http": 404,
+      "cliExit": 1,
+      "staleReasons": [],
+      "markdownPresent": false,
+      "filesUnchangedByVerify": true,
+      "errorCode": "EVIDENCE_NOT_FOUND",
+      "errorEnvelope": "error.code is asserted; full verification report/reasonCode not required on failure"
+    },
+    {
+      "id": "corrupt-markdown",
+      "currentReuseStatus": "failed",
+      "packageStatus": null,
+      "http": 409,
+      "cliExit": 2,
+      "staleReasons": [],
+      "markdownPresent": false,
+      "filesUnchangedByVerify": true,
+      "errorCode": "EVIDENCE_INTEGRITY",
+      "errorEnvelope": "error.code is asserted; full verification report/reasonCode not required on failure"
+    },
+    {
+      "id": "corrupt-record",
+      "currentReuseStatus": "failed",
+      "packageStatus": null,
+      "http": 409,
+      "cliExit": 2,
+      "staleReasons": [],
+      "markdownPresent": false,
+      "filesUnchangedByVerify": true,
+      "errorCode": "EVIDENCE_INTEGRITY",
+      "errorEnvelope": "error.code is asserted; full verification report/reasonCode not required on failure"
+    },
+    {
+      "id": "raw-crlf-and-fence",
+      "currentReuseStatus": "usable",
+      "packageStatus": "complete",
+      "http": 200,
+      "cliExit": 0,
+      "staleReasons": [],
+      "markdownPresent": true,
+      "filesUnchangedByVerify": true,
+      "logicalReferencesChecked": 2,
+      "uniqueReferencedSourceFiles": 1,
+      "duplicateReferenceCount": 1,
+      "reasonCode": "verified"
+    },
+    {
+      "id": "scope-count-blocked",
+      "currentReuseStatus": "blocked",
+      "packageStatus": "complete",
+      "http": 409,
+      "cliExit": 2,
+      "staleReasons": [],
+      "markdownPresent": false,
+      "filesUnchangedByVerify": true,
+      "currentSourceBytesRead": 0,
+      "currentSourceFilesRead": 0,
+      "stale": null,
+      "reasonCode": "scan-limit-exceeded"
+    },
+    {
+      "id": "invalid-id",
+      "currentReuseStatus": "failed",
+      "packageStatus": null,
+      "http": 400,
+      "cliExit": 1,
+      "staleReasons": [],
+      "markdownPresent": false,
+      "filesUnchangedByVerify": true,
+      "errorCode": "VERIFY_INVALID_REQUEST",
+      "errorEnvelope": "error.code is asserted; full verification report/reasonCode not required on failure"
+    }
+  ],
+  "sharedAssertions": [
+    "对usable/stale，recordBytes和markdownBytes用read_bytes长度独立计算；currentSourceBytesRead等于当前最新CSV原文encode长度总和，逐源hashlib.sha256等于登记。",
+    "measuredReadBytes=recordBytes+markdownBytes+currentSourceBytesRead；uniqueFilesRead=2+currentSourceFilesRead；不可拿包文件数与逻辑引用数做不等式。",
+    "includeMarkdown只有usable存在，markdown.encode(UTF-8)==保存包read_bytes；默认不含markdown；stale/blocked/failed不含正文。",
+    "wrong-project和missing-package对外404/error.code相同，错误响应不含目标查询/项目/path/hash/body。",
+    "对完整范围核验成功，logicalReferencesChecked=len(saved snapshot.selectedRecords)，uniqueReferencedSourceFiles=不同path数量；这些来自既有M4E保存内容而非M4F输出。",
+    "原件和包核验前后SHA不变，不产生新登记/知识版本。"
+  ]
+}

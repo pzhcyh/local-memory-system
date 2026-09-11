@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="dark">
+    <title>Memory · 本地记忆库</title>
+    <link rel="stylesheet" href="/style.css">
+    <script src="/app.js" defer></script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand"><span class="brand-mark" aria-hidden="true">▱</span><strong>Memory</strong><span>LOCAL</span></div>
+        <label class="field-label" for="vault-select">记忆库</label>
+        <select id="vault-select" disabled><option value="">正在连接本地服务…</option></select>
+        <nav aria-label="主要导航">
+          <button class="nav-button selected" data-page="steward" type="button"><span aria-hidden="true">◇</span>记忆管家</button>
+          <button class="nav-button" data-page="knowledge" type="button"><span aria-hidden="true">◎</span>加工知识</button>
+          <button class="nav-button" data-page="records" type="button"><span aria-hidden="true">▤</span>原始资料</button>
+          <button class="nav-button" data-page="search" type="button"><span aria-hidden="true">⌕</span>项目检索</button>
+          <button class="nav-button" data-page="import" type="button"><span aria-hidden="true">＋</span>导入资料</button>
+          <button class="nav-button" data-page="codex" type="button"><span aria-hidden="true">›_</span>Codex 入口</button>
+          <button class="nav-button" data-page="models" type="button"><span aria-hidden="true">⚙</span>模型服务</button>
+        </nav>
+        <div class="sidebar-note"><span class="eyebrow">当前能力</span><p>原文独立保存<br>有限轮加工与验证<br>纠正、历史与恢复</p></div>
+        <div class="sidebar-bottom"><span id="connection-status">正在连接…</span><span class="stage-label">M4-A · 任务上下文</span></div>
+      </aside>
+      <main>
+        <div id="stage-banner" class="stage-banner">本机记忆库 · 原文与加工结果真实留存 · 管家只处理已授权的项目</div>
+        <div id="example-entry" class="example-entry" hidden><div><strong>体验管家闭环</strong><p>案例保存在“管家体验库”，与基础存取资料分开。</p></div><button id="open-steward-example" class="button primary" type="button">打开管家闭环示例</button></div>
+        <header class="topbar"><div><span id="current-vault-name">本地记忆库</span><span class="breadcrumb-separator">/</span><strong id="page-title">记忆管家</strong></div><button id="reconnect-button" class="button" type="button" title="更新连接令牌并核验同一记忆库，保留草稿，不自动提交">重新连接</button></header>
+        <div id="notice" class="notice" role="status" aria-live="polite" hidden></div>
+        <section id="page-steward" class="page">
+          <div class="page-heading"><div><div class="eyebrow">MEMORY STEWARD</div><h1>记忆管家</h1><p id="steward-heading-copy">选择项目，将已有原文加入队列。每轮都有明确的任务数与时间上限。</p></div><button id="steward-refresh" class="button" type="button">刷新状态</button></div>
+          <ol class="flow-steps"><li><b>1</b>保存原文</li><li><b>2</b>加入队列并运行</li><li><b>3</b>核对知识与来源</li><li><b>4</b>纠正后重新加工</li></ol>
+          <div class="steward-grid">
+            <section class="work-card"><h2>本次加工范围</h2><form id="steward-enqueue-form">
+              <label for="steward-project">项目<select id="steward-project" required><option value="">请选择项目</option></select></label>
+              <label for="steward-model">管家模型<select id="steward-model" required disabled><option value="">先选择有效记忆库</option></select></label>
+              <label for="steward-policy">资料处理范围<select id="steward-policy"><option value="local-only">仅本地处理</option><option value="external-approved">允许已授权的第三方处理</option></select></label>
+              <p id="steward-scope" class="scope-note">选择项目和模型后显示实际授权范围。</p><p id="steward-source" class="help">项目原文状态待读取。</p>
+              <div class="model-actions"><button id="steward-enqueue" class="button primary" type="submit" disabled>将当前资料加入队列</button><button class="button" data-page="import" type="button">导入新原文</button></div>
+              <details class="event-details"><summary>本次提交标识</summary><code id="steward-event"></code><button id="steward-new-event" class="text-button" type="button">开始新任务</button><p class="help">网络失败时保留标识重试；只有新任务才换标识。</p></details>
+            </form></section>
+            <section class="work-card"><h2>有限轮运行</h2><div id="steward-status" class="run-status" role="status" aria-live="polite">正在读取后台状态…</div>
+              <form id="steward-run-form"><div class="form-grid"><label for="steward-max-jobs">本轮最多任务数<input id="steward-max-jobs" type="number" min="1" max="3" step="1" value="1" required></label><label for="steward-max-seconds">本轮最长秒数<input id="steward-max-seconds" type="number" min="1" max="180" step="1" value="120" required></label></div><p class="help">运行当前记忆库的待处理队列。按任务显示项目范围；达到上限后停止，不自动续轮。</p><div class="model-actions"><button id="steward-run" class="button primary" type="submit" disabled>开始这一轮</button><button id="steward-pause" class="button" type="button" disabled>暂停后续处理</button></div></form>
+              <p class="help">暂停不会冒充撤销已发送的模型请求；以后台返回的运行和任务状态为准。</p><div id="steward-round" class="round-summary"></div>
+            </section>
+          </div>
+          <div class="section-heading"><h2>处理队列与轨迹</h2><span id="steward-queue-count">尚未读取</span></div><p class="help section-help">显示当前记忆库的实际任务。失败或中断不会记为完成，重试保留任务身份。</p><div id="steward-jobs"><div class="empty">暂无已读取的任务。</div></div>
+        </section>
+        <section id="page-knowledge" class="page" hidden>
+          <div class="page-heading"><div><div class="eyebrow">PROCESSED KNOWLEDGE</div><h1>加工知识</h1><p>每条知识保留原文引用。纠正立即使旧解释失效，重新加工后再形成当前版本。</p></div><button id="knowledge-refresh" class="button" type="button">刷新知识</button></div>
+          <div class="knowledge-toolbar"><label for="knowledge-project">项目<select id="knowledge-project"><option value="">请选择项目</option></select></label><button class="button" data-page="steward" type="button">返回管家处理</button></div>
+          <div id="knowledge-status" class="status-strip" role="status" aria-live="polite">选择项目后读取真实知识版本。</div><p id="knowledge-entry" class="help mono"></p>
+          <div class="knowledge-layout"><section><div class="section-heading"><h2 id="knowledge-version-title">当前知识</h2><button id="knowledge-show-current" class="text-button" type="button" hidden>回到当前版本</button></div><div id="knowledge-entries"><div class="empty">请选择项目。</div></div></section><aside class="work-card knowledge-history"><h2>版本与恢复</h2><p class="help">历史版本保留原样。恢复会核验当前版本与资料状态，不能覆盖后续更改。</p><div id="knowledge-versions" class="version-list"></div>
+              <form id="knowledge-restore-form" hidden><p id="knowledge-restore-target" class="scope-note"></p><label for="knowledge-restore-reason">恢复原因<textarea id="knowledge-restore-reason" rows="3" required maxlength="2000" placeholder="说明需要恢复此版本的原因"></textarea></label><button id="knowledge-restore" class="button" type="submit">恢复为新版本（待复核）</button><p id="knowledge-restore-guard" class="help"></p></form>
+          </aside></div>
+          <section id="correction-panel" class="work-card correction-panel"><h2>提交纠正</h2><p class="help">先选择“纠正此条”，再填写应替代当前条目的正确内容，例如：当前会议时间：周一 10:30。纠正作为独立记录保存，原文保持不变。</p><form id="correction-form"><p id="correction-target" class="scope-note">尚未选择需要纠正的条目。</p><label for="correction-text">正确表述与依据<textarea id="correction-text" rows="4" required maxlength="8000" placeholder="填写应替代当前条目的正确内容，例如：当前会议时间：周一 10:30。仅填写合成项目内容。"></textarea></label><div class="form-actions"><span id="correction-guard" class="help">提交成功后，返回管家重新加入队列并运行。</span><button id="correction-next" class="button" type="button" data-page="steward" hidden>返回管家重新加工</button><button id="correction-submit" class="button primary" type="submit" disabled>保存纠正并使旧解释失效</button></div><details class="event-details"><summary>纠正事件标识</summary><code id="correction-event"></code></details></form></section>
+          <section class="knowledge-search"><div class="section-heading"><h2>检索加工知识</h2><span id="knowledge-search-count">尚未检索</span></div><form id="knowledge-search-form"><div class="search-controls"><label class="query-field" for="knowledge-query">当前项目内的关键词<input id="knowledge-query" required maxlength="200" placeholder="输入加工知识中的关键词"></label><button class="button" type="submit">检索知识</button></div><label class="check-label"><input id="knowledge-search-history" type="checkbox">包含历史与失效版本</label></form><div id="knowledge-search-results"></div></section>
+        </section>
+        <section id="page-records" class="page records-page" hidden>
+          <div class="page-heading"><div><div class="eyebrow">FILES</div><h1>记忆库</h1><p id="vault-path" class="mono">连接后显示真实目录</p></div><button id="refresh-button" class="button" type="button">刷新列表</button></div>
+          <div class="status-strip"><span id="record-count">— 条版本记录</span><span id="index-status">索引状态待读取</span><button id="reindex-button" class="text-button" type="button">重建索引</button></div>
+          <div class="file-workspace">
+            <section class="file-list-column" aria-label="资料列表">
+              <label class="field-label" for="records-project">浏览项目</label><select id="records-project"><option value="">全部项目（仅浏览）</option></select>
+              <div id="record-list" class="record-list"><p class="empty">正在读取记录…</p></div>
+            </section>
+            <article id="record-detail" class="file-reader" aria-label="资料详情"><div class="empty"><h2>选择一条资料</h2><p>这里显示实际保存的原文、来源及版本。</p></div></article>
+          </div>
+        </section>
+        <section id="page-search" class="page" hidden>
+          <div class="page-heading"><div><div class="eyebrow">RETRIEVAL</div><h1>项目检索</h1><p>选择一个项目，为当前任务准备有引用的加工知识；也可单独检索原始资料核对证据。词法检索不生成答案。</p></div></div>
+          <label for="search-project">项目<select id="search-project" required><option value="">请选择项目</option></select></label>
+          <section class="connection-card context-panel" aria-label="任务上下文">
+            <h2>为任务准备当前知识</h2><p>按中文与英文词语匹配当前加工知识，保留完整引用。上下文是生成时的快照，不是模型答案；匹配分数不是置信度。</p>
+            <form id="context-form"><label for="context-query">这次任务需要什么信息？<textarea id="context-query" required maxlength="200" rows="3" placeholder="例如：会议 时间"></textarea></label>
+              <div class="search-controls"><label for="context-budget">上下文预算<select id="context-budget"><option value="2048">2,048 字节</option><option value="4096">4,096 字节</option><option value="8192" selected>8,192 字节</option><option value="16384">16,384 字节</option></select></label><button id="context-prepare" class="button primary" type="submit">准备任务上下文</button><button id="context-save" class="button" type="button" disabled>保存上下文文件</button></div>
+            </form>
+            <p id="context-status" class="scope-note" role="status">请选择项目并填写任务问题。</p><div id="context-warnings"></div><div id="context-results"></div>
+            <label for="context-preview">将保存的 Markdown 快照<textarea id="context-preview" readonly rows="10" placeholder="准备后显示完整上下文与引用"></textarea></label>
+            <div id="context-receipt" hidden><p id="context-saved-status" role="status"></p><pre id="context-saved-path" class="code-block"></pre><div id="context-copy-tools"></div></div>
+            <div class="section-heading"><h3>已保存上下文</h3><button id="context-list-refresh" type="button" class="button">刷新已保存文件</button></div><div id="context-list"><p class="help">选择项目后查看已保存上下文。</p></div><details><summary>本次保存事件</summary><p id="context-event" class="help mono">尚未提交</p></details>
+          </section>
+          <section class="connection-card context-panel" aria-label="CSV原始来源证据">
+            <h2>CSV原始来源证据</h2><p>原始来源证据，未经知识加工/事实确认。仅检索所选项目最新 CSV 的数据记录，区分大小写；最新来源不等于业务事实当前正确，CSV 未发布为当前知识。</p>
+            <form id="evidence-form"><label for="evidence-query">CSV 连续关键词<input id="evidence-query" required maxlength="400" placeholder="原样匹配，保留首尾空格"></label>
+              <div class="search-controls"><label for="evidence-budget">证据包预算<select id="evidence-budget"><option value="2048">2,048 字节</option><option value="4096">4,096 字节</option><option value="8192" selected>8,192 字节</option><option value="16384">16,384 字节</option><option value="32768">32,768 字节</option></select></label><button id="evidence-prepare" class="button" type="submit">检索并准备 CSV 证据包</button><button id="evidence-save" class="button" type="button" disabled>保存 CSV 证据包</button></div>
+            </form>
+            <p id="evidence-status" class="scope-note" role="status">请选择项目并填写 CSV 关键词。</p><div id="evidence-warnings"></div><div id="evidence-results"></div>
+            <label for="evidence-preview">将保存的 CSV 证据 Markdown<textarea id="evidence-preview" readonly rows="10"></textarea></label>
+            <div id="evidence-receipt" hidden><p id="evidence-saved-status" role="status"></p><pre id="evidence-saved-path" class="code-block"></pre><div id="evidence-copy-tools"></div></div>
+            <div class="section-heading"><h3>已保存 CSV 证据包</h3><button id="evidence-list-refresh" class="button" type="button">刷新 CSV 证据包</button></div><div id="evidence-list"></div><details><summary>CSV 保存事件</summary><p id="evidence-event" class="help mono">尚未提交</p></details>
+          </section>
+          <section class="connection-card" aria-label="CSV 复用前核验">
+            <h2>CSV 复用前核验</h2><p id="verification-status" class="scope-note" role="status">从已保存 CSV 包选择“核验复用”。仅核验通过时交付原包正文；不会替换或保存证据包。</p>
+            <div id="verification-report"></div>
+            <label id="verification-body-label" for="verification-body" hidden>本次核验通过的原包正文<textarea id="verification-body" readonly rows="12"></textarea></label>
+          </section>
+          <h2>原始资料（可能含旧结论）</h2><p>下面按原文逐字匹配，不能代替上方的当前知识。</p>
+          <form id="search-form">
+            <div class="search-controls"><label class="query-field" for="search-query">原文关键词<input id="search-query" required maxlength="200" placeholder="输入原文中的连续关键词"></label><button class="button" type="submit">检索原始资料</button></div>
+            <label class="check-label"><input id="search-history" type="checkbox">包含同一来源的历史版本</label>
+          </form>
+          <div class="section-heading"><h2>来源片段</h2><span id="search-count">尚未检索</span></div>
+          <div id="search-results"><div class="empty"><h3>检索以项目为边界</h3><p>选择项目后开始。缺少证据时会明确返回无匹配。</p></div></div>
+        </section>
+        <section id="page-import" class="page" hidden>
+          <div class="page-heading"><div><div class="eyebrow">CONTROLLED IMPORT</div><h1 id="import-title">导入资料</h1><p id="import-heading-copy">保留原文与来源。已有来源的新版本以新增方式留存。</p></div></div>
+          <form id="import-form" class="import-form">
+            <div class="form-grid"><label for="import-project">项目<input id="import-project" required maxlength="200" placeholder="例如：试用项目-甲"></label><label for="import-kind">记录类型<select id="import-kind"><option value="file">原始资料</option><option value="work-record">工作记录</option></select></label><label for="import-source-id">来源稳定 ID<input id="import-source-id" required maxlength="200" placeholder="同一来源的新版本沿用此 ID"></label><label for="import-source-tool">来源工具<input id="import-source-tool" required value="manual-ui" maxlength="200"></label><label class="full-width" for="import-locator">来源定位<input id="import-locator" required placeholder="local://试用资料/来源位置"></label><label for="import-filename">文件名<input id="import-filename" required placeholder="记录.md"></label><label for="import-version">预期已有版本号<input id="import-version" type="number" min="0" step="1" value="0" required><small>新来源填 0；追加版本填该来源当前版本号。</small></label></div>
+            <div class="event-field"><label for="import-event">事件 ID<input id="import-event" readonly required></label><button id="new-event-button" class="button" type="button">新建事件</button></div><p class="help">重复提交同一事件应返回已有记录。网络失败后保留当前事件 ID；开始一条新记录时再新建事件。</p>
+            <fieldset class="content-mode"><legend>提交方式</legend><label><input name="content-mode" type="radio" value="text" checked>手动文本</label><label><input name="content-mode" type="radio" value="file">选择文件</label></fieldset>
+            <div id="text-input-panel"><label for="import-content">原始文本<textarea id="import-content" rows="8" placeholder="粘贴本轮要保存的资料正文"></textarea></label></div>
+            <div id="file-input-panel" hidden><label for="import-file">资料文件<input id="import-file" type="file"></label><p class="help">单文件最多 2 MiB。支持的文本可检索；其他类型原样保存并明确显示解析状态。</p></div>
+            <label class="check-label synthetic-check"><input id="synthetic-confirm" type="checkbox" required><span id="scope-confirm-copy">我确认提交的是当前库允许的数据范围。</span></label>
+            <div class="form-actions"><span class="help">缺失的原始时间与会话信息会如实登记。</span><button id="import-submit" class="button primary" type="submit">保存到记忆库</button></div>
+            <div id="import-result" class="import-result" role="status" aria-live="polite" hidden></div>
+          </form>
+        </section>
+        <section id="page-codex" class="page" hidden>
+          <div class="page-heading"><div><div class="eyebrow">DIRECT FILE ACCESS</div><h1>Codex 入口</h1><p>通过当前获授权的文件工具读取独立目录，再通过受控入口提交测试结果。</p></div></div>
+          <div class="connection-card"><span class="tag">真实文件入口</span><h2>记忆入口</h2><pre id="codex-entry" class="code-block">连接后显示入口文件绝对路径</pre><button id="copy-entry-button" class="button" type="button">复制入口路径</button><h2>最短闭环</h2><ol><li>请 Codex 读取上面的入口文件，并明确本次使用的项目。</li><li>按入口中的文件约定读取原文，回答时保留来源、版本和行号。</li><li>使用本页下方的受控提交命令，留存一条标记为合成测试的工作记录。</li><li>回到记忆库刷新，查看实际留存的结果。</li></ol><h2>准备任务上下文</h2><p>在项目检索页准备并保存快照，然后让 Codex 读取返回的真实文件路径。也可使用以下命令；保存前先检查预览。context-payload.json 需包含 eventId（新事件）、project、query、maxBytes，以及预览返回的 expectedSnapshotId（使用 snapshotId 值）；重试使用同一文件。</p><pre id="codex-context-command" class="code-block">连接后显示上下文命令</pre><h2>按项目检索</h2><p>命令使用当前服务和已选择的测试库。将项目与关键词替换为本次实际使用的范围。</p><pre id="codex-search-command" class="code-block">连接后显示当前服务的检索命令</pre><h2>留存实际测试结果</h2><p>将下面的 JSON 示例填写完整，保存为 UTF-8 的 payload.json，再运行提交命令。来源、原文定位与结果须按本次实际测试填写；示例不代表已验证。首次提交使用新的事件 ID，重试保留同一个 ID。</p><pre id="codex-payload" class="code-block"></pre><pre id="codex-submit-command" class="code-block">连接后显示当前服务的提交命令</pre><p>关闭本地服务后，入口和原始资料仍可由普通文件工具读取。上面的检索与受控提交命令需要本地服务运行。</p><p class="boundary-note">此入口不代表新对话已自动加载记忆，也不代表历史对话已被全量采集。加工知识页提供各项目的当前入口；先核对当前版本状态，再引用知识与原文。</p></div>
+        </section>
+        <section id="page-models" class="page" hidden>
+          <div class="page-heading"><div><div class="eyebrow">MODEL SERVICES</div><h1>模型服务</h1><p>配置管家使用的 OpenAI 兼容服务，逐项检查实际能力。这里的选择不改变 Codex 自身的模型配置。</p></div><button id="models-refresh" class="button" type="button">刷新连接</button></div>
+          <div id="models-status" class="status-strip">进入本页后读取本机连接配置。</div>
+          <div class="model-workspace">
+            <aside class="model-list-column" aria-label="模型连接列表"><button id="model-new" class="button" type="button">＋ 新建连接</button><div id="model-list" class="record-list"><p class="empty">尚未读取连接。</p></div></aside>
+            <div class="model-editor">
+              <form id="model-profile-form" autocomplete="off">
+                <h2 id="model-editor-title">新建模型连接</h2>
+                <p id="model-edit-note" class="help">保存配置不会调用模型。连接变更后，需要重新授权与检查。</p>
+                <div class="form-grid model-fields">
+                  <label for="model-name">连接名称<input id="model-name" required maxlength="100" placeholder="例如：本机推理服务"></label>
+                  <label for="model-kind">服务类型<select id="model-kind"><option value="local">本地模型</option><option value="external">第三方 API / 外发网关</option></select></label>
+                  <label class="full-width" for="model-adapter">协议适配器<select id="model-adapter"><option value="generic">通用 OpenAI 兼容服务</option><option value="opencsg">OpenCSG 直连 · Qwen 关闭思考</option><option value="csglite">CSGLite（本地请求强制 source=local）</option></select></label>
+                  <label class="full-width" for="model-base-url">Base URL<input id="model-base-url" required type="url" placeholder="http://127.0.0.1:端口/v1" spellcheck="false"><small>填写服务地址，不在地址内包含 API Key。</small></label>
+                  <label class="full-width" for="model-model">模型 ID<input id="model-model" required maxlength="200" placeholder="填写服务实际提供的模型 ID" spellcheck="false"></label>
+                </div>
+                <p id="model-kind-note" class="model-boundary"></p>
+                <fieldset class="model-limits"><legend>调用与费用上限</legend><div class="form-grid">
+                  <label for="model-max-calls">累计调用次数上限<input id="model-max-calls" type="number" min="1" max="50" step="1" value="8" required></label>
+                  <label for="model-max-seconds">单次最长秒数<input id="model-max-seconds" type="number" min="1" max="60" step="1" value="30" required></label>
+                  <label for="model-max-output">请求输出 token 上限<input id="model-max-output" type="number" min="16" max="2048" step="1" value="256" required></label>
+                  <label for="model-max-cost">累计费用上限（人民币元）<input id="model-max-cost" type="number" min="0" max="100" step="0.000001" placeholder="待确认"></label>
+                  <label for="model-input-price">输入单价（元 / 百万 token）<input id="model-input-price" type="number" min="0" max="10000" step="0.000001" placeholder="待确认"></label>
+                  <label for="model-output-price">输出单价（元 / 百万 token）<input id="model-output-price" type="number" min="0" max="10000" step="0.000001" placeholder="待确认"></label>
+                </div><label id="model-rates-label" class="check-label"><input id="model-rates-known" type="checkbox">我已核实上述费率；填写 0 表示已确认免费。</label><p id="model-rates-note" class="help"></p><p id="model-budget-help" class="help">单次输入按已保存配置限制，保存编辑时保留现有输入上限。供应商可能另计或超出输出用量，请求上限不是账户硬限；报告用量另行核对。外部服务费率未知时不能发起检查，修改上限不会补回已用额度。</p></fieldset>
+                <div class="form-actions"><span class="help">保存后再进行凭据配置和检查。</span><button id="model-save" class="button primary" type="submit">保存连接</button></div>
+              </form>
+              <div id="model-saved-panel" hidden>
+                <div class="model-section"><h2>连接状态</h2><dl id="model-metadata" class="metadata model-metadata"></dl><div id="model-capabilities" class="capability-grid"></div><p id="model-locality" class="model-boundary"></p></div>
+                <form id="model-project-authorization-form" class="model-section"><h2 id="model-project-auth-title">项目处理授权</h2><p id="model-project-auth-copy" class="help">授权绑定当前连接版本、记忆库和项目。已有有效授权的任务运行时无需重复批准。</p><div class="form-grid"><label for="model-project-scope">当前记忆库中的项目<select id="model-project-scope" required><option value="">请选择项目</option></select></label><label for="model-project-policy">允许的处理范围<select id="model-project-policy"><option value="local-only">仅本地处理</option><option value="external-approved">允许第三方处理</option></select></label></div><p id="model-project-vault" class="help"></p><label class="check-label"><input id="model-project-confirm" type="checkbox"><span id="model-project-confirm-copy">我确认授权该模型在上述范围内处理。</span></label><div class="model-actions"><button id="model-project-authorize" class="button" type="submit">保存项目授权</button><button id="model-project-revoke" class="button" type="button">撤销所选项目授权</button></div><div id="model-project-authorizations" class="grant-list"></div></form>
+                <form id="model-credential-form" class="model-section" autocomplete="off"><h2>安全凭据</h2><p id="model-credential-status" class="help"></p><label for="model-secret">API Key（服务无需鉴权时可跳过）<input id="model-secret" type="password" autocomplete="new-password" spellcheck="false" autocapitalize="off" placeholder="仅在本页输入，不在对话中粘贴"></label><div class="form-actions"><span class="help">提交到本机 macOS Keychain；连接配置仅保存引用。提交后立即清空输入框。</span><button id="model-save-credential" class="button" type="submit">保存到 Keychain</button></div></form>
+                <div class="model-section"><h2>固定合成能力检查</h2><p class="help">只发送产品内置的文本、结构化输出和工具调用探针，不读取记忆库。探针中的工具仅检查返回格式，不执行文件或命令。任何项目资料外发都需要另行授权。</p><p id="model-authorization-status" class="help"></p><label class="check-label model-consent"><input id="model-authorize-confirm" type="checkbox">我授权按上述次数 / 费用上限发送固定合成能力检查文本。</label><div class="model-actions"><button id="model-authorize" class="button" type="button">保存本次授权</button><button id="model-check" class="button primary" type="button">运行能力检查</button><button id="model-primary" class="button" type="button">设为管家主模型</button></div><p id="model-check-help" class="help"></p><pre id="model-check-result" class="code-block" role="status" aria-live="polite" hidden></pre></div>
+              </div>
+            </div>
+          </div>
+        </section>
+        <footer class="statusbar"><span>独立文件 · 来源可追溯 · 索引可重建</span><span id="footer-vault">未连接</span></footer>
+      </main>
+    </div>
+    <noscript><div class="noscript">此页面需要启用 JavaScript 连接本地服务；实际资料仍可直接从测试库读取。</div></noscript>
+  </body>
+</html>

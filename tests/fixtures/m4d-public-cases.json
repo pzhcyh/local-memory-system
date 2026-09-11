@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "contract": "M4D_CONTRACT.md R0",
+  "cases": [
+    {"id":"basic","text":"名称,数量\n甲,2\n","header":{"recordNumber":1,"lineStart":1,"lineEnd":1,"cells":["名称","数量"]},"rows":[{"recordNumber":2,"lineStart":2,"lineEnd":2,"cells":["甲","2"]}]},
+    {"id":"bom-crlf-multiline","text":"﻿名称,备注\r\n甲,\"第一行\r\n第二行\"\r\n","header":{"recordNumber":1,"lineStart":1,"lineEnd":1,"cells":["名称","备注"]},"rows":[{"recordNumber":2,"lineStart":2,"lineEnd":3,"cells":["甲","第一行\r\n第二行"]}]},
+    {"id":"comma-quotes","text":"a,b\n\"x,y\",\"他说\"\"好\"\"\"","header":{"recordNumber":1,"lineStart":1,"lineEnd":1,"cells":["a","b"]},"rows":[{"recordNumber":2,"lineStart":2,"lineEnd":2,"cells":["x,y","他说\"好\""]}]},
+    {"id":"duplicate-empty-headers","text":"名,名,\n,甲,\n","header":{"recordNumber":1,"lineStart":1,"lineEnd":1,"cells":["名","名",""]},"rows":[{"recordNumber":2,"lineStart":2,"lineEnd":2,"cells":["","甲",""]}]},
+    {"id":"header-only","text":"a,b","header":{"recordNumber":1,"lineStart":1,"lineEnd":1,"cells":["a","b"]},"rows":[]},
+    {"id":"unicode-space","text":"a,b\n x ,\"甲 乙\"\n","header":{"recordNumber":1,"lineStart":1,"lineEnd":1,"cells":["a","b"]},"rows":[{"recordNumber":2,"lineStart":2,"lineEnd":2,"cells":[" x ","甲 乙"]}]},
+    {"id":"literal-formula-html","text":"a,b\n=1+1,<script>alert(1)</script>\n","header":{"recordNumber":1,"lineStart":1,"lineEnd":1,"cells":["a","b"]},"rows":[{"recordNumber":2,"lineStart":2,"lineEnd":2,"cells":["=1+1","<script>alert(1)</script>"]}]},
+    {"id":"empty","text":"","error":"empty-csv"},
+    {"id":"invalid-utf8","hex":"612c620aff","error":"invalid-utf8"},
+    {"id":"unclosed","text":"a,b\n甲,\"未闭合","error":"invalid-csv"},
+    {"id":"quote-in-unquoted","text":"a,b\nx\"y,z\n","error":"invalid-csv"},
+    {"id":"after-quote","text":"a,b\n\"x\"y,z\n","error":"invalid-csv"},
+    {"id":"uneven","text":"a,b\n甲\n","error":"column-count-mismatch"},
+    {"id":"bare-cr","text":"a,b\r甲,乙","error":"invalid-csv"},
+    {"id":"blank-record","text":"a,b\n\n","error":"invalid-csv"}
+  ]
+}

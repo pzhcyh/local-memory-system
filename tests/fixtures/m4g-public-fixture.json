@@ -1,0 +1,126 @@
+{
+  "schema": 1,
+  "freeze": "m4g-r1",
+  "scope": "isolated-synthetic-only",
+  "notExecuted": true,
+  "modelCallsAllowed": 0,
+  "outputPolicy": "new absolute root with Chinese and spaces; reject existing root",
+  "vaults": [
+    "main",
+    "control"
+  ],
+  "projects": {
+    "main": [
+      "M4G-甲",
+      "M4G-乙",
+      "M4G-表格",
+      "M4G-未加工",
+      "M4G-部分",
+      "M4G-超限"
+    ],
+    "control": [
+      "M4G-甲"
+    ]
+  },
+  "sources": [
+    {
+      "vault": "main",
+      "project": "M4G-甲",
+      "id": "meeting-a",
+      "filename": "合成会议.md",
+      "text": "会议时间：周二 10:00。\n项目暗号：松风。\n",
+      "knowledgeSeed": true
+    },
+    {
+      "vault": "main",
+      "project": "M4G-乙",
+      "id": "meeting-b",
+      "filename": "合成会议.md",
+      "text": "会议时间：周五 15:00。\n项目暗号：竹影。\n",
+      "knowledgeSeed": true
+    },
+    {
+      "vault": "control",
+      "project": "M4G-甲",
+      "id": "meeting-control",
+      "filename": "合成会议.md",
+      "text": "会议时间：周日 09:00。\n项目暗号：隔离。\n",
+      "knowledgeSeed": true
+    },
+    {
+      "vault": "main",
+      "project": "M4G-表格",
+      "id": "csv-a",
+      "filename": "合成表格.csv",
+      "text": "编号,负责人,备注\r\n1,林禾,\"第一行\r\n第二行\"\r\n2,青竹,\"=1+1\"\r\n",
+      "knowledgeSeed": false
+    },
+    {
+      "vault": "main",
+      "project": "M4G-部分",
+      "id": "csv-good",
+      "filename": "正常.csv",
+      "text": "编号,备注\n1,演示命中\n"
+    },
+    {
+      "vault": "main",
+      "project": "M4G-部分",
+      "id": "csv-bad",
+      "filename": "格式失败.csv",
+      "text": "编号,备注\n1,\"未闭合"
+    }
+  ],
+  "generators": [
+    {
+      "project": "M4G-超限",
+      "count": 33,
+      "sourceIdPattern": "limit-{index:02d}",
+      "indexRange": [
+        1,
+        33
+      ],
+      "filename": "限额.csv",
+      "text": "编号,备注\n1,演示命中\n",
+      "constructionOrder": "Create sources 1..32, explicitly save original evidence for query 演示命中 using maxBytes 8192, then add source33; this same project demonstrates blocked search and verification of an existing package."
+    }
+  ],
+  "browserImport": {
+    "project": "M4G-未加工",
+    "filename": "浏览器 合成导入.md",
+    "text": "这是一条合成导入记录。\n验证短语：海桐。\n"
+  },
+  "queries": {
+    "context": "会议时间",
+    "noMatch": "量子鲸鱼宇宙秘钥",
+    "csv": "第二行",
+    "csvPartial": "演示命中",
+    "csvBlocked": "演示命中"
+  },
+  "budget": 8192,
+  "mutations": [
+    {
+      "after": "saved-context-in-M4G-甲",
+      "project": "M4G-甲",
+      "id": "meeting-a",
+      "append": "新增记录：等待复核。\n",
+      "publishAfter": false
+    },
+    {
+      "after": "saved-csv-evidence",
+      "project": "M4G-表格",
+      "newSourceId": "csv-added",
+      "filename": "新增.csv",
+      "text": "编号,备注\n3,新增证据\n"
+    }
+  ],
+  "knowledgeSeedPolicy": "only explicitly selected markdown at prepare; one entry per nonempty physical line through existing validation; synthetic-fixture-no-model; no fabricated steward success; knowledge projects contain only supported Markdown; all CSV in separate projects; never filter unsupported sources out of a knowledge snapshot",
+  "runtimeIdentifiers": "generated identities/events/paths resolved from manifest; expected semantic outcomes fixed before candidate",
+  "constructionOrder": [
+    "create two new vaults",
+    "submit source files",
+    "seed only tagged Markdown via existing validator",
+    "construct limit project sequentially as specified",
+    "do not prepare normal user context/evidence in advance; browser creates its own events",
+    "mutations only after corresponding user-flow saves"
+  ]
+}

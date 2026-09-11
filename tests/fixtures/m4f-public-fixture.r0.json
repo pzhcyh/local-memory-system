@@ -1,0 +1,466 @@
+{
+  "schema": 1,
+  "freeze": "m4f-r0-reviewed-v1",
+  "contract": "M4F_CONTRACT.md",
+  "encoding": "UTF-8; encode text exactly; never normalize newline",
+  "construction": [
+    "每个case使用独立、此前不存在的真实绝对目录（resolve路径避免macOS软链）。初始化仅合成Vault；禁止复用已验收库。",
+    "按sources顺序调用既有Vault.submit或POST imports，expectedVersion=0, synthetic=true，source={id:key,tool:m4f-public-fixture,locator:synthetic://m4f/<case>/<key>,recordedAt:null,sessionId:null}，eventId=<case>-<key>-v1；text.encode(UTF-8)经contentBase64提交。保存record.id/path/sha256映射并独立回读源字节。",
+    "调用既有CsvEvidence.preview(project,query,maxBytes)或GET csv-evidence准备，再按save.eventId/project/query/maxBytes/expectedSnapshotId通过既有save保存。此步骤仅构造M4E包，不调用M4F；包状态必须符合save.expectedSavedStatus（变更前），否则fixture构造失败。packageKey映射保存回执record.id与路径；保存各文件原字节与SHA。",
+    "执行afterSave：submit指定version，expectedVersion=version-1，同key/project沿用source.id/tool，使用全新eventId；submit-series扩展为count份不同key；corrupt-isolated-package仅对本case自建目录中的该包显式允许写入并改指定文件，不修改其它记录。",
+    "核验前重新保存当前原件/包的字节SHA基线，调用M4F受测接口或CLI；按独立expected断言状态/退出码/正文/账本公式。损坏案例对“注入后->核验后”不变，而不是要求恢复旧值。",
+    "每案关闭自有Vault/服务，不停止其他服务。不自动删除不可变临时库；记录测试路径以便有界善后。"
+  ],
+  "cases": [
+    {
+      "id": "complete",
+      "project": "M4F-甲",
+      "sources": [
+        {
+          "key": "main",
+          "project": "M4F-甲",
+          "filename": "来源.csv",
+          "text": "编号,负责人,备注\r\n1,林禾,\"第一行\r\n第二行\"\r\n2,林禾,\"```仅资料```\"\r\n"
+        }
+      ],
+      "save": {
+        "packageKey": "complete",
+        "query": "林禾",
+        "maxBytes": 8192,
+        "eventId": "save-complete",
+        "expectedSavedStatus": "complete"
+      },
+      "afterSave": [],
+      "verify": {
+        "project": "M4F-甲",
+        "packageKey": "complete",
+        "includeMarkdown": true
+      }
+    },
+    {
+      "id": "zero-match",
+      "project": "M4F-甲",
+      "sources": [
+        {
+          "key": "main",
+          "project": "M4F-甲",
+          "filename": "来源.csv",
+          "text": "编号,负责人,备注\r\n1,林禾,\"第一行\r\n第二行\"\r\n2,林禾,\"```仅资料```\"\r\n"
+        }
+      ],
+      "save": {
+        "packageKey": "zero-match",
+        "query": "完全未命中",
+        "maxBytes": 8192,
+        "eventId": "save-zero-match",
+        "expectedSavedStatus": "complete"
+      },
+      "afterSave": [],
+      "verify": {
+        "project": "M4F-甲",
+        "packageKey": "zero-match",
+        "includeMarkdown": true
+      }
+    },
+    {
+      "id": "partial",
+      "project": "M4F-甲",
+      "sources": [
+        {
+          "key": "main",
+          "project": "M4F-甲",
+          "filename": "来源.csv",
+          "text": "编号,负责人,备注\r\n1,林禾,\"第一行\r\n第二行\"\r\n2,林禾,\"```仅资料```\"\r\n"
+        },
+        {
+          "key": "bad",
+          "project": "M4F-甲",
+          "filename": "损坏.csv",
+          "text": "a\n\"未闭合"
+        }
+      ],
+      "save": {
+        "packageKey": "partial",
+        "query": "林禾",
+        "maxBytes": 8192,
+        "eventId": "save-partial",
+        "expectedSavedStatus": "partial"
+      },
+      "afterSave": [],
+      "verify": {
+        "project": "M4F-甲",
+        "packageKey": "partial",
+        "includeMarkdown": true
+      }
+    },
+    {
+      "id": "add-source",
+      "project": "M4F-甲",
+      "sources": [
+        {
+          "key": "main",
+          "project": "M4F-甲",
+          "filename": "来源.csv",
+          "text": "编号,负责人,备注\r\n1,林禾,\"第一行\r\n第二行\"\r\n2,林禾,\"```仅资料```\"\r\n"
+        }
+      ],
+      "save": {
+        "packageKey": "add-source",
+        "query": "林禾",
+        "maxBytes": 8192,
+        "eventId": "save-add-source",
+        "expectedSavedStatus": "complete"
+      },
+      "afterSave": [
+        {
+          "action": "submit",
+          "key": "new",
+          "project": "M4F-甲",
+          "filename": "新增.csv",
+          "text": "列\n新值\n",
+          "version": 1
+        }
+      ],
+      "verify": {
+        "project": "M4F-甲",
+        "packageKey": "add-source",
+        "includeMarkdown": true
+      }
+    },
+    {
+      "id": "change-version",
+      "project": "M4F-甲",
+      "sources": [
+        {
+          "key": "main",
+          "project": "M4F-甲",
+          "filename": "来源.csv",
+          "text": "编号,负责人,备注\r\n1,林禾,\"第一行\r\n第二行\"\r\n2,林禾,\"```仅资料```\"\r\n"
+        }
+      ],
+      "save": {
+        "packageKey": "change-version",
+        "query": "林禾",
+        "maxBytes": 8192,
+        "eventId": "save-change-version",
+        "expectedSavedStatus": "complete"
+      },
+      "afterSave": [
+        {
+          "action": "submit",
+          "key": "main",
+          "project": "M4F-甲",
+          "filename": "来源.csv",
+          "text": "编号,负责人,备注\r\n1,林禾,\"第一行\r\n第二行\"\r\n2,林禾,\"```仅资料```\"\r\n3,其它,新增\r\n",
+          "version": 2
+        }
+      ],
+      "verify": {
+        "project": "M4F-甲",
+        "packageKey": "change-version",
+        "includeMarkdown": true
+      }
+    },
+    {
+      "id": "other-project",
+      "project": "M4F-甲",
+      "sources": [
+        {
+          "key": "main",
+          "project": "M4F-甲",
+          "filename": "来源.csv",
+          "text": "编号,负责人,备注\r\n1,林禾,\"第一行\r\n第二行\"\r\n2,林禾,\"```仅资料```\"\r\n"
+        }
+      ],
+      "save": {
+        "packageKey": "other-project",
+        "query": "林禾",
+        "maxBytes": 8192,
+        "eventId": "save-other-project",
+        "expectedSavedStatus": "complete"
+      },
+      "afterSave": [
+        {
+          "action": "submit",
+          "key": "other",
+          "project": "M4F-乙",
+          "filename": "其它.csv",
+          "text": "列\n不同\n",
+          "version": 1
+        }
+      ],
+      "verify": {
+        "project": "M4F-甲",
+        "packageKey": "other-project",
+        "includeMarkdown": true
+      }
+    },
+    {
+      "id": "ordinary-note",
+      "project": "M4F-甲",
+      "sources": [
+        {
+          "key": "main",
+          "project": "M4F-甲",
+          "filename": "来源.csv",
+          "text": "编号,负责人,备注\r\n1,林禾,\"第一行\r\n第二行\"\r\n2,林禾,\"```仅资料```\"\r\n"
+        }
+      ],
+      "save": {
+        "packageKey": "ordinary-note",
+        "query": "林禾",
+        "maxBytes": 8192,
+        "eventId": "save-ordinary-note",
+        "expectedSavedStatus": "complete"
+      },
+      "afterSave": [
+        {
+          "action": "submit",
+          "key": "note",
+          "project": "M4F-甲",
+          "filename": "笔记.txt",
+          "text": "这是普通文本\n",
+          "version": 1
+        }
+      ],
+      "verify": {
+        "project": "M4F-甲",
+        "packageKey": "ordinary-note",
+        "includeMarkdown": true
+      }
+    },
+    {
+      "id": "latest-not-csv",
+      "project": "M4F-甲",
+      "sources": [
+        {
+          "key": "main",
+          "project": "M4F-甲",
+          "filename": "来源.csv",
+          "text": "编号,负责人,备注\r\n1,林禾,\"第一行\r\n第二行\"\r\n2,林禾,\"```仅资料```\"\r\n"
+        }
+      ],
+      "save": {
+        "packageKey": "latest-not-csv",
+        "query": "林禾",
+        "maxBytes": 8192,
+        "eventId": "save-latest-not-csv",
+        "expectedSavedStatus": "complete"
+      },
+      "afterSave": [
+        {
+          "action": "submit",
+          "key": "main",
+          "project": "M4F-甲",
+          "filename": "来源.txt",
+          "text": "改为文本\n",
+          "version": 2
+        }
+      ],
+      "verify": {
+        "project": "M4F-甲",
+        "packageKey": "latest-not-csv",
+        "includeMarkdown": true
+      }
+    },
+    {
+      "id": "wrong-project",
+      "project": "M4F-甲",
+      "sources": [
+        {
+          "key": "main",
+          "project": "M4F-甲",
+          "filename": "来源.csv",
+          "text": "编号,负责人,备注\r\n1,林禾,\"第一行\r\n第二行\"\r\n2,林禾,\"```仅资料```\"\r\n"
+        }
+      ],
+      "save": {
+        "packageKey": "wrong-project",
+        "query": "林禾",
+        "maxBytes": 8192,
+        "eventId": "save-wrong-project",
+        "expectedSavedStatus": "complete"
+      },
+      "afterSave": [],
+      "verify": {
+        "project": "M4F-乙",
+        "packageKey": "wrong-project",
+        "includeMarkdown": true
+      }
+    },
+    {
+      "id": "missing-package",
+      "project": "M4F-甲",
+      "sources": [
+        {
+          "key": "main",
+          "project": "M4F-甲",
+          "filename": "来源.csv",
+          "text": "编号,负责人,备注\r\n1,林禾,\"第一行\r\n第二行\"\r\n2,林禾,\"```仅资料```\"\r\n"
+        }
+      ],
+      "save": {
+        "packageKey": "missing-package",
+        "query": "林禾",
+        "maxBytes": 8192,
+        "eventId": "save-missing-package",
+        "expectedSavedStatus": "complete"
+      },
+      "afterSave": [],
+      "verify": {
+        "project": "M4F-甲",
+        "packageId": "0000000000000000000000000000000000000000000000000000000000000000",
+        "includeMarkdown": true
+      }
+    },
+    {
+      "id": "corrupt-markdown",
+      "project": "M4F-甲",
+      "sources": [
+        {
+          "key": "main",
+          "project": "M4F-甲",
+          "filename": "来源.csv",
+          "text": "编号,负责人,备注\r\n1,林禾,\"第一行\r\n第二行\"\r\n2,林禾,\"```仅资料```\"\r\n"
+        }
+      ],
+      "save": {
+        "packageKey": "corrupt-markdown",
+        "query": "林禾",
+        "maxBytes": 8192,
+        "eventId": "save-corrupt-markdown",
+        "expectedSavedStatus": "complete"
+      },
+      "afterSave": [
+        {
+          "action": "corrupt-isolated-package",
+          "file": "evidence.md",
+          "operation": "append-byte",
+          "hex": "78"
+        }
+      ],
+      "verify": {
+        "project": "M4F-甲",
+        "packageKey": "corrupt-markdown",
+        "includeMarkdown": true
+      }
+    },
+    {
+      "id": "corrupt-record",
+      "project": "M4F-甲",
+      "sources": [
+        {
+          "key": "main",
+          "project": "M4F-甲",
+          "filename": "来源.csv",
+          "text": "编号,负责人,备注\r\n1,林禾,\"第一行\r\n第二行\"\r\n2,林禾,\"```仅资料```\"\r\n"
+        }
+      ],
+      "save": {
+        "packageKey": "corrupt-record",
+        "query": "林禾",
+        "maxBytes": 8192,
+        "eventId": "save-corrupt-record",
+        "expectedSavedStatus": "complete"
+      },
+      "afterSave": [
+        {
+          "action": "corrupt-isolated-package",
+          "file": "record.json",
+          "operation": "replace-with-bytes",
+          "hex": "7b7d"
+        }
+      ],
+      "verify": {
+        "project": "M4F-甲",
+        "packageKey": "corrupt-record",
+        "includeMarkdown": true
+      }
+    },
+    {
+      "id": "raw-crlf-and-fence",
+      "project": "M4F-甲",
+      "sources": [
+        {
+          "key": "main",
+          "project": "M4F-甲",
+          "filename": "来源.csv",
+          "text": "编号,负责人,备注\r\n1,林禾,\"第一行\r\n第二行\"\r\n2,林禾,\"```仅资料```\"\r\n"
+        }
+      ],
+      "save": {
+        "packageKey": "raw-crlf-and-fence",
+        "query": "林禾",
+        "maxBytes": 8192,
+        "eventId": "save-raw-crlf-and-fence",
+        "expectedSavedStatus": "complete"
+      },
+      "afterSave": [],
+      "verify": {
+        "project": "M4F-甲",
+        "packageKey": "raw-crlf-and-fence",
+        "includeMarkdown": true
+      }
+    },
+    {
+      "id": "scope-count-blocked",
+      "project": "M4F-甲",
+      "sources": [
+        {
+          "key": "main",
+          "project": "M4F-甲",
+          "filename": "来源.csv",
+          "text": "编号,负责人,备注\r\n1,林禾,\"第一行\r\n第二行\"\r\n2,林禾,\"```仅资料```\"\r\n"
+        }
+      ],
+      "save": {
+        "packageKey": "scope-count-blocked",
+        "query": "林禾",
+        "maxBytes": 8192,
+        "eventId": "save-scope-count-blocked",
+        "expectedSavedStatus": "complete"
+      },
+      "afterSave": [
+        {
+          "action": "submit-series",
+          "count": 32,
+          "keyPrefix": "extra-",
+          "project": "M4F-甲",
+          "filename": "额外.csv",
+          "text": "列\n值\n",
+          "version": 1
+        }
+      ],
+      "verify": {
+        "project": "M4F-甲",
+        "packageKey": "scope-count-blocked",
+        "includeMarkdown": true
+      }
+    },
+    {
+      "id": "invalid-id",
+      "project": "M4F-甲",
+      "sources": [
+        {
+          "key": "main",
+          "project": "M4F-甲",
+          "filename": "来源.csv",
+          "text": "编号,负责人,备注\r\n1,林禾,\"第一行\r\n第二行\"\r\n2,林禾,\"```仅资料```\"\r\n"
+        }
+      ],
+      "save": {
+        "packageKey": "invalid-id",
+        "query": "林禾",
+        "maxBytes": 8192,
+        "eventId": "save-invalid-id",
+        "expectedSavedStatus": "complete"
+      },
+      "afterSave": [],
+      "verify": {
+        "project": "M4F-甲",
+        "packageId": "../invalid",
+        "includeMarkdown": true
+      }
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "schema":1,
+  "sources":[
+    {"sourceKey":"a-orders","project":"M4E-甲","filename":"订单.csv","versions":["编号,负责人,备注\n1,旧负责人,旧消息\n","编号,负责人,备注\r\n1,林禾,\"含,逗号\"\r\n2,江宁,\"第一行\r\n第二行\"\r\n3,林禾,林禾跟进\r\n"]},
+    {"sourceKey":"a-notes","project":"M4E-甲","filename":"备注.csv","versions":["标识,内容\nabc,\"他说\"\"好\"\"\"\nＡＢＣ,=1+1\n"]},
+    {"sourceKey":"b-orders","project":"M4E-乙","filename":"订单.csv","versions":["编号,负责人,备注\n1,乙方,林禾\n"]}
+  ],
+  "cases":[
+    {"id":"owner-dedupe","project":"M4E-甲","query":"林禾","expected":[{"sourceKey":"a-orders","version":2,"recordNumber":2,"matchedColumns":[2]},{"sourceKey":"a-orders","version":2,"recordNumber":4,"matchedColumns":[2,3]}]},
+    {"id":"comma-decoded","project":"M4E-甲","query":"含,逗号","expected":[{"sourceKey":"a-orders","version":2,"recordNumber":2,"matchedColumns":[3]}]},
+    {"id":"multiline","project":"M4E-甲","query":"第二行","expected":[{"sourceKey":"a-orders","version":2,"recordNumber":3,"matchedColumns":[3]}]},
+    {"id":"quote-decoded","project":"M4E-甲","query":"他说\"好\"","expected":[{"sourceKey":"a-notes","version":1,"recordNumber":2,"matchedColumns":[2]}]},
+    {"id":"case-sensitive","project":"M4E-甲","query":"ABC","expected":[]},
+    {"id":"fullwidth-exact","project":"M4E-甲","query":"ＡＢＣ","expected":[{"sourceKey":"a-notes","version":1,"recordNumber":3,"matchedColumns":[1]}]},
+    {"id":"formula-literal","project":"M4E-甲","query":"=1+1","expected":[{"sourceKey":"a-notes","version":1,"recordNumber":3,"matchedColumns":[2]}]},
+    {"id":"history-excluded","project":"M4E-甲","query":"旧负责人","expected":[]},
+    {"id":"header-excluded","project":"M4E-甲","query":"负责人","expected":[]},
+    {"id":"scope","project":"M4E-甲","query":"乙方","expected":[]},
+    {"id":"other-project","project":"M4E-乙","query":"林禾","expected":[{"sourceKey":"b-orders","version":1,"recordNumber":2,"matchedColumns":[3]}]},
+    {"id":"no-match","project":"M4E-甲","query":"量子鲸鱼","expected":[]}
+  ]
+}

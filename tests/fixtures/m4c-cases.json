@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "projects": {
+    "M4C-甲": ["会议时间：周三 09:00。", "交付负责人：林禾。", "项目暗号：银杏。", "Release ＡＢＣ 已排期。"],
+    "M4C-乙": ["会议时间：周四 14:00。", "交付负责人：江宁。", "项目暗号：枫树。"],
+    "M4C-丙": ["长文说明：", "短文摘要：完成。"]
+  },
+  "longText": {"project": "M4C-丙", "line": 1, "append": "合成内容", "repeat": 1000},
+  "cases": [
+    {"id":"a-time","project":"M4C-甲","query":"会议时间","expected":[1],"relevant":[1]},
+    {"id":"b-time","project":"M4C-乙","query":"会议时间","expected":[1],"relevant":[1]},
+    {"id":"a-owner","project":"M4C-甲","query":"交付负责人","expected":[2],"relevant":[2]},
+    {"id":"b-owner","project":"M4C-乙","query":"交付负责人","expected":[2],"relevant":[2]},
+    {"id":"a-two","project":"M4C-甲","query":"会议时间 交付负责人","expected":[1,2],"relevant":[1,2]},
+    {"id":"b-two","project":"M4C-乙","query":"会议时间 交付负责人","expected":[1,2],"relevant":[1,2]},
+    {"id":"a-code","project":"M4C-甲","query":"银杏","expected":[3],"relevant":[3]},
+    {"id":"b-code","project":"M4C-乙","query":"枫树","expected":[3],"relevant":[3]},
+    {"id":"scope-a","project":"M4C-甲","query":"枫树","expected":[],"relevant":[]},
+    {"id":"scope-b","project":"M4C-乙","query":"银杏","expected":[],"relevant":[]},
+    {"id":"nfkc","project":"M4C-甲","query":"release abc","expected":[4],"relevant":[4]},
+    {"id":"unknown-a","project":"M4C-甲","query":"量子鲸鱼宇宙秘钥","expected":[],"relevant":[]},
+    {"id":"unknown-b","project":"M4C-乙","query":"量子鲸鱼宇宙秘钥","expected":[],"relevant":[]},
+    {"id":"synonym","project":"M4C-甲","query":"谁是交货的牵头人","expected":[],"relevant":[2]},
+    {"id":"long-small","project":"M4C-丙","query":"长文说明","budget":2048,"expected":[],"relevant":[1],"budgetExcluded":1},
+    {"id":"long-large","project":"M4C-丙","query":"长文说明","budget":32768,"expected":[1],"relevant":[1]},
+    {"id":"mixed-small","project":"M4C-丙","query":"长文说明 短文摘要","budget":2048,"expected":[2],"relevant":[1,2],"budgetExcluded":1},
+    {"id":"short","project":"M4C-丙","query":"短文摘要","expected":[2],"relevant":[2]},
+    {"id":"pending","project":"M4C-甲","query":"会议时间","state":"pending","expected":[],"relevant":[]},
+    {"id":"empty","project":"M4C-空","query":"会议时间","expected":[],"relevant":[]}
+  ]
+}

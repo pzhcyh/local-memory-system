@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+.DS_Store
+.test-tmp/
+.local-data/
+.local-state/
+evidence/server.log
+evidence/
