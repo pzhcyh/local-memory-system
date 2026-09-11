@@ -62,6 +62,10 @@ Requirements: macOS or another POSIX-like environment with Python 3.9+.
 
 运行要求：macOS 或类 POSIX 环境，Python 3.9+。
 
+HTML usage guide: [docs/usage.html](docs/usage.html)
+
+HTML 使用说明：[docs/usage.html](docs/usage.html)
+
 ```sh
 git clone git@github.com:pzhcyh/local-memory-system.git
 cd local-memory-system

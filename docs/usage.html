@@ -1,0 +1,441 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>本地记忆系统使用说明 | Local Memory System Guide</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #18212f;
+      --muted: #5d6878;
+      --line: #d7dce3;
+      --panel: #f7f8fa;
+      --code: #101828;
+      --accent: #0f766e;
+      --accent-soft: #e4f3f0;
+      --warning: #8a4b10;
+      --warning-soft: #fff4df;
+      --max: 1080px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC", "Microsoft YaHei", Arial, sans-serif;
+      color: var(--ink);
+      background: #ffffff;
+      line-height: 1.65;
+    }
+
+    header {
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(180deg, #f6fbfa 0%, #ffffff 100%);
+    }
+
+    .wrap {
+      width: min(var(--max), calc(100% - 40px));
+      margin: 0 auto;
+    }
+
+    .hero {
+      padding: 56px 0 34px;
+    }
+
+    .eyebrow {
+      color: var(--accent);
+      font-weight: 700;
+      letter-spacing: 0;
+      margin: 0 0 12px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(32px, 5vw, 56px);
+      line-height: 1.08;
+      letter-spacing: 0;
+    }
+
+    .lead {
+      max-width: 840px;
+      margin: 18px 0 0;
+      color: var(--muted);
+      font-size: 18px;
+    }
+
+    nav {
+      padding: 18px 0 26px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    nav a {
+      color: var(--ink);
+      text-decoration: none;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 8px 12px;
+      background: #fff;
+      font-size: 14px;
+    }
+
+    main {
+      padding: 34px 0 64px;
+    }
+
+    section {
+      padding: 28px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    section:last-child {
+      border-bottom: 0;
+    }
+
+    h2 {
+      margin: 0 0 14px;
+      font-size: 26px;
+      line-height: 1.25;
+      letter-spacing: 0;
+    }
+
+    h3 {
+      margin: 22px 0 8px;
+      font-size: 19px;
+      letter-spacing: 0;
+    }
+
+    p {
+      margin: 10px 0;
+    }
+
+    ul, ol {
+      padding-left: 22px;
+      margin: 10px 0 0;
+    }
+
+    li {
+      margin: 6px 0;
+    }
+
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      background: #eef1f4;
+      border-radius: 5px;
+      padding: 2px 5px;
+      color: var(--code);
+    }
+
+    pre {
+      margin: 12px 0;
+      padding: 14px 16px;
+      overflow: auto;
+      border-radius: 8px;
+      background: #111827;
+      color: #f8fafc;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    pre code {
+      background: transparent;
+      color: inherit;
+      padding: 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 14px 0;
+      font-size: 14px;
+    }
+
+    th, td {
+      border: 1px solid var(--line);
+      padding: 10px 12px;
+      vertical-align: top;
+      text-align: left;
+    }
+
+    th {
+      background: var(--panel);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .box {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px;
+      background: var(--panel);
+    }
+
+    .note {
+      border-left: 4px solid var(--accent);
+      background: var(--accent-soft);
+      padding: 12px 14px;
+      border-radius: 0 8px 8px 0;
+      margin: 14px 0;
+    }
+
+    .warn {
+      border-left-color: var(--warning);
+      background: var(--warning-soft);
+      color: #4f2d08;
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    footer {
+      border-top: 1px solid var(--line);
+      padding: 22px 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    @media (max-width: 760px) {
+      .wrap {
+        width: min(100% - 28px, var(--max));
+      }
+
+      .hero {
+        padding-top: 38px;
+      }
+
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      table {
+        display: block;
+        overflow-x: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap hero">
+      <p class="eyebrow">Local Memory System 使用说明</p>
+      <h1>本地记忆系统：从资料导入到任务上下文</h1>
+      <p class="lead">这份说明面向第一次使用者，帮助你在本机启动系统、创建资料库、导入资料、检索来源、保存上下文，并理解模型处理和数据边界。</p>
+    </div>
+    <nav class="wrap" aria-label="页面目录">
+      <a href="#overview">系统定位</a>
+      <a href="#install">安装启动</a>
+      <a href="#workflow">使用流程</a>
+      <a href="#vault">资料库结构</a>
+      <a href="#model">模型处理</a>
+      <a href="#cli">CLI 命令</a>
+      <a href="#safety">边界与安全</a>
+      <a href="#troubleshooting">常见问题</a>
+    </nav>
+  </header>
+
+  <main class="wrap">
+    <section id="overview">
+      <h2>1. 系统定位</h2>
+      <p>本地记忆系统用于长期项目中的 AI 协作记忆管理。它不追求让助手无差别记住所有内容，而是把资料、来源、版本、人工纠正、加工知识和任务上下文分开保存，让每次调用 AI 前都能知道“这次引用了哪些资料”。</p>
+      <div class="grid">
+        <div class="box">
+          <h3>适合的场景</h3>
+          <ul>
+            <li>长期项目资料整理和复用。</li>
+            <li>商务、产品、研发、交付、运营等需要来源依据的工作。</li>
+            <li>为 ChatGPT、Codex 或其他助手准备有边界的任务上下文。</li>
+            <li>本地优先的个人或团队知识库试用。</li>
+          </ul>
+        </div>
+        <div class="box">
+          <h3>不适合直接承诺的能力</h3>
+          <ul>
+            <li>不是自动采集所有聊天历史的工具。</li>
+            <li>不是多用户权限系统或企业级安全网关。</li>
+            <li>不是无条件自治代理。</li>
+            <li>默认字面检索，不等同于语义搜索。</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section id="install">
+      <h2>2. 安装与启动</h2>
+      <p>运行环境建议使用 macOS 或类 POSIX 环境，Python 3.9 及以上版本。系统运行不需要数据库服务，索引使用本机 SQLite 重建。</p>
+      <h3>从 GitHub 获取代码</h3>
+      <pre><code>git clone git@github.com:pzhcyh/local-memory-system.git
+cd local-memory-system</code></pre>
+
+      <h3>启动默认本地服务</h3>
+      <pre><code>./start.command</code></pre>
+      <p>启动后打开：</p>
+      <pre><code>http://127.0.0.1:4191/</code></pre>
+      <p>默认启动会在仓库内创建两个本地目录：</p>
+      <ul>
+        <li><code>.local-data/</code>：保存演示库和空库的数据。</li>
+        <li><code>.local-state/</code>：保存模型配置、队列和服务运行状态。</li>
+      </ul>
+      <p>这两个目录默认被 Git 忽略，不会提交到仓库。</p>
+
+      <h3>只启动基础文件库</h3>
+      <pre><code>./start-m1.command</code></pre>
+
+      <h3>后台启动与停止</h3>
+      <pre><code>./start-background.command
+./stop-background.command</code></pre>
+      <div class="note">
+        <strong>说明：</strong>后台控制脚本只管理自己登记过的服务进程。端口已被其他进程占用时，它不会接管或停止对方进程。
+      </div>
+
+      <h3>指定自己的资料库</h3>
+      <pre><code>python3 -m memory_service.server --init --port 4191 \
+  --vault "work=/absolute/path/to/your/vault"</code></pre>
+    </section>
+
+    <section id="workflow">
+      <h2>3. Web 页面使用流程</h2>
+      <ol>
+        <li>打开 <code>http://127.0.0.1:4191/</code>。</li>
+        <li>在页面顶部选择一个资料库，例如 <code>demo</code> 或 <code>empty</code>。</li>
+        <li>进入“导入资料”，填写项目名、来源 ID、文件名和资料内容。</li>
+        <li>保存后进入“原始资料”或“项目检索”，按项目查看和检索。</li>
+        <li>如果该项目已有加工知识，进入“任务上下文”区域，输入本次任务问题和字节预算。</li>
+        <li>点击准备上下文，核对引用来源、版本和内容。</li>
+        <li>确认后保存上下文文件，把生成的 <code>context.md</code> 交给 AI 助手读取。</li>
+      </ol>
+
+      <h3>导入资料时建议填写</h3>
+      <table>
+        <thead>
+          <tr><th>字段</th><th>建议</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>项目名</td><td>使用稳定名称，例如客户名、项目名、专题名。</td></tr>
+          <tr><td>来源 ID</td><td>同一来源后续更新保持相同 ID，不同来源使用不同 ID。</td></tr>
+          <tr><td>文件名</td><td>保留可读后缀，例如 <code>meeting-note.md</code>、<code>orders.csv</code>。</td></tr>
+          <tr><td>内容</td><td>只导入当前允许保存的材料，不导入密钥、密码或未经授权资料。</td></tr>
+        </tbody>
+      </table>
+
+      <h3>任务上下文怎么用</h3>
+      <p>任务上下文是一次任务的“引用快照”。它会记录项目、查询、知识版本、来源路径、引用行号和引用内容。保存后的上下文不会自动更新；如果来源或当前知识变化，系统会标记旧上下文已过期。</p>
+      <div class="warn note">
+        <strong>注意：</strong>上下文命中依赖当前加工知识。没有命中不代表原始资料里没有答案，也不代表业务事实不存在。
+      </div>
+    </section>
+
+    <section id="vault">
+      <h2>4. 资料库结构</h2>
+      <p>资料库是普通文件夹，可以脱离服务直接查看。核心结构如下：</p>
+      <pre><code>vault.json
+INDEX.md
+originals/
+knowledge/
+  projects/
+  contexts/
+  source-evidence/
+.staging/</code></pre>
+      <table>
+        <thead>
+          <tr><th>路径</th><th>用途</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>vault.json</code></td><td>资料库身份和 schema 信息。</td></tr>
+          <tr><td><code>INDEX.md</code></td><td>可直接阅读的入口索引，可由服务重建。</td></tr>
+          <tr><td><code>originals/</code></td><td>保存原始资料的不可变版本。</td></tr>
+          <tr><td><code>knowledge/projects/</code></td><td>保存按项目生成的加工知识和当前入口。</td></tr>
+          <tr><td><code>knowledge/contexts/</code></td><td>保存任务上下文快照。</td></tr>
+          <tr><td><code>knowledge/source-evidence/</code></td><td>保存 CSV 来源证据包。</td></tr>
+          <tr><td><code>.staging/</code></td><td>原子写入暂存区，异常时用于保留现场。</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="model">
+      <h2>5. 模型处理与人工纠正</h2>
+      <p>模型处理是可选能力。配置模型并不等于允许模型处理所有资料；真实资料应按具体项目保存授权后再进入处理队列。</p>
+      <h3>建议流程</h3>
+      <ol>
+        <li>进入“模型服务”，添加模型连接。</li>
+        <li>完成固定能力检查。</li>
+        <li>为具体资料库、项目、模型版本和处理策略保存授权。</li>
+        <li>进入“记忆管家”，把该项目加入队列。</li>
+        <li>运行有限一轮，完成后核对加工知识来源。</li>
+      </ol>
+      <h3>人工纠正</h3>
+      <p>当加工知识不准确时，不要直接覆盖原始资料。应在页面中选择对应知识条目进行纠正。纠正会作为新的来源记录保存，旧知识标记为待复核，重新处理后才会形成新的当前知识。</p>
+    </section>
+
+    <section id="cli">
+      <h2>6. CLI 常用命令</h2>
+      <p>CLI 默认连接 <code>http://127.0.0.1:4191</code>。服务运行后可执行：</p>
+      <pre><code>python3 memoryctl.py --vault demo status
+python3 memoryctl.py --vault demo list
+python3 memoryctl.py --vault demo search --project "Example" --query "keyword"
+python3 memoryctl.py --vault demo context --project "Example" --query "what should I know?" --max-bytes 4096
+python3 memoryctl.py --vault demo contexts --project "Example"</code></pre>
+
+      <h3>提交资料</h3>
+      <p>提交资料需要准备完整 JSON 文件，并使用新的 <code>eventId</code>。不要重复使用别人的验收样本事件。</p>
+      <pre><code>python3 memoryctl.py --vault demo submit payload.json</code></pre>
+
+      <h3>CSV 来源证据</h3>
+      <pre><code>python3 memoryctl.py --vault demo csv-search --project "Example" --query "第二行"
+python3 memoryctl.py --vault demo csv-evidence --project "Example" --query "第二行" --max-bytes 8192
+python3 memoryctl.py --vault demo csv-evidence-list --project "Example"</code></pre>
+    </section>
+
+    <section id="safety">
+      <h2>7. 数据边界与安全</h2>
+      <ul>
+        <li>Web 服务只绑定 <code>127.0.0.1</code>。</li>
+        <li>页面按文本显示导入材料，不执行其中的 HTML 或脚本。</li>
+        <li>浏览器令牌只保存在内存中，是本机会话保护，不是多用户认证系统。</li>
+        <li>来源校验值用于完整性检查，不等于带密钥签名。</li>
+        <li>默认发布仓库不包含私有数据、运行状态、模型凭据或个人资料库。</li>
+        <li>同一系统用户下的其他本机进程仍属于当前信任边界内，不能把本系统当作抵御本机用户的安全沙箱。</li>
+      </ul>
+    </section>
+
+    <section id="troubleshooting">
+      <h2>8. 常见问题</h2>
+      <h3>页面打不开</h3>
+      <p>先确认服务是否启动，并检查端口是否被占用：</p>
+      <pre><code>python3 scripts/service_control.py status</code></pre>
+
+      <h3>提示端口已有监听</h3>
+      <p>说明 4191 已被其他进程占用。后台控制脚本不会接管未知进程。可以停止自己的旧服务，或换一个端口直接启动。</p>
+
+      <h3>上下文显示过期</h3>
+      <p>说明来源、知识版本或知识状态发生变化。请重新准备上下文，再保存新的快照。</p>
+
+      <h3>模型未配置或未授权</h3>
+      <p>这不是故障。文件导入、原始检索和部分上下文能力仍可使用。需要模型处理时，再按项目授权。</p>
+
+      <h3>如何确认没有把本地数据提交到 Git</h3>
+      <pre><code>git status --short
+git check-ignore .local-data .local-state evidence</code></pre>
+      <p class="muted">如果这些目录被 Git 忽略，说明默认开源边界仍然有效。</p>
+    </section>
+
+    <section id="english">
+      <h2>English Summary</h2>
+      <p>Local Memory System is a local-first project memory workbench for AI-assisted work. It keeps source files readable as ordinary local files, preserves immutable versions, separates raw sources from derived knowledge and saved task contexts, and requires explicit project-level authorization before model processing of real material.</p>
+      <p>Start it with <code>./start.command</code>, open <code>http://127.0.0.1:4191/</code>, import project material, search sources, prepare a bounded task context, and hand the saved <code>context.md</code> to an AI assistant when needed.</p>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">Local Memory System / 本地记忆系统 · HTML 使用说明</div>
+  </footer>
+</body>
+</html>
